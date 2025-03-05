@@ -1,5 +1,5 @@
 # Use an official Python image as a base
-FROM python:3.12
+FROM python:3-alpine
 
 # Set the working directory
 WORKDIR /app
@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8000
 
 # Run the FastAPI application using Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["hypercorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
