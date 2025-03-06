@@ -1,5 +1,5 @@
-# Use the official Node.js image
-FROM node:18-alpine
+# Use a Debian-based Node.js image
+FROM node:18-bullseye
 
 # Set the working directory
 WORKDIR /app
@@ -16,9 +16,8 @@ COPY . .
 # Build the Next.js application
 RUN npm run build
 
-# Expose the port the app runs on
+# Expose the port
 EXPOSE 3000
 
 # Start the application
 CMD ["npm", "start"]
-

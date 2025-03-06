@@ -1,36 +1,39 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { JobSiteSelector } from "@/components/job-site-selector"
-import { getJobSites } from "@/app/actions/job-site-actions"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { JobSiteSelector } from "@/components/job-site-selector";
+import { getJobSites } from "@/app/actions/job-site-actions";
 
 export default function Home() {
-  const [selectedJobSite, setSelectedJobSite] = useState<{ id: string; name: string } | null>(null)
-  const router = useRouter()
+  const [selectedJobSite, setSelectedJobSite] = useState<{ id: string; name: string } | null>(null);
+  const [jobSites, setJobSites] = useState<{ id: string; name: string }[]>([]);
+  const router = useRouter();
+
+  // Fetch job sites when the component mounts
+  useEffect(() => {
+    const fetchJobSites = async () => {
+      try {
+        const sites = await getJobSites();
+        setJobSites(sites);
+      } catch (error) {
+        console.error("Error fetching job sites:", error);
+      }
+    };
+
+    fetchJobSites();
+  }, []);
 
   const handleSignInOut = () => {
     if (selectedJobSite) {
-      router.push(`/signin-out?jobSiteId=${selectedJobSite.id}`)
+      router.push(`/signin-out?jobSiteId=${selectedJobSite.id}`);
     } else {
-      alert("Please select a job site before proceeding.")
-    }
-  }
-
-  const getJobSitesAsync = async () => {
-    try {
-      return getJobSites();
-    } catch (error) {
-      console.error("Error fetching job sites:", error);
-      return [];
+      alert("Please select a job site before proceeding.");
     }
   };
-  
-
-  const jobSitesPromise = getJobSitesAsync()
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -47,7 +50,7 @@ export default function Home() {
             <CardDescription>Choose the job site you're working at today</CardDescription>
           </CardHeader>
           <CardContent>
-            <JobSiteSelector jobSites={await jobSitesPromise} onSelect={setSelectedJobSite} />
+            <JobSiteSelector jobSites={jobSites} onSelect={setSelectedJobSite} />
           </CardContent>
         </Card>
 
@@ -105,7 +108,7 @@ export default function Home() {
 
       <footer className="bg-slate-100 py-6">
         <div className="container mx-auto px-4 text-center text-slate-600">
-          <p>© {new Date().getFullYear()} WorkSite Safety System</p>
+          <p>© {new Date().getFullYear()} Transform Homes P/L</p>
         </div>
       </footer>
     </div>
