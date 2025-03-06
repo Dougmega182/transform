@@ -17,6 +17,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { FileText, CheckCircle } from "lucide-react"
 import { signDocument } from "@/app/actions/document-actions"
+import * as PDFJS from 'pdfjs-dist';
+import { useEffect, useRef } from 'react';
 
 // Mock data for documents
 const documents = [
@@ -40,7 +42,10 @@ const documents = [
   },
 ]
 
-export default function DocumentsPage() {
+// Set the worker source
+PDFJS.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS.version}/pdf.worker.min.js`;
+
+  export default function DocumentsPage() {
   const [docs, setDocs] = useState(documents)
   const [selectedDoc, setSelectedDoc] = useState<(typeof documents)[0] | null>(null)
   const [name, setName] = useState("")
@@ -51,27 +56,114 @@ export default function DocumentsPage() {
 
     setLoading(true)
     try {
-      // In a real app, this would call a server action to record the signature
-      await signDocument({
-        documentId: selectedDoc.id,
-        name,
-        timestamp: new Date().toISOString(),
-      })
+      // Define your signature data interface
+      interface SignatureData {
+        documentId: string;
+        name: string;
+        timestamp: string;
+      };
 
-      // Update the local state to show the document as signed
-      setDocs(docs.map((doc) => (doc.id === selectedDoc.id ? { ...doc, signed: true } : doc)))
+      // Create a function to call your server
+      const signDocument = async (signatureData: SignatureData) => {
+        const response = await fetch('https://postgres-production-5236.up.railway.app/api/signatures', {
+         method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            // Add authorization header if needed
+            // 'Authorization': `Bearer ${yourAuthToken}`
+          },
+          body: JSON.stringify(signatureData)
+        });
+  
+        if (!response.ok) {
+         throw new Error(`Error signing document: ${response.statusText}`);
+        }
+  
+        return await response.json();
+      };
 
-      // Close the dialog by setting selectedDoc to null
-      setSelectedDoc(null)
-      setName("")
-    } catch (error) {
-      console.error("Error signing document:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
+      setLoading(true);
+        try {
+          // Now this will call the actual server endpoint
+          const result = await signDocument({
+            documentId: selectedDoc.id,
+            name,
+            timestamp: new Date().toISOString(),
+          });
+    
+          // Handle successful signature
+          console.log("Document signed successfully:", result);
+          // Maybe update UI or navigate to another page
+    
+        } 
+          catch (error) {
+          console.error("Failed to sign document:", error);
+          // Handle errors - show message to user
+        } 
+          finally {
+          setLoading(false);
+        }
+            // Update the local state to show the document as signed
+            setDocs(docs.map((doc) => (doc.id === selectedDoc.id ? { ...doc, signed: true } : doc)))
 
-  return (
+            // Close the dialog by setting selectedDoc to null
+            setSelectedDoc(null)
+            setName("")
+          } 
+            catch (error) {
+            console.error("Error signing document:", error)
+          } 
+            finally {
+            setLoading(false)
+          }
+        };
+        const PdfViewerComponent: React.FC<{ pdfUrl: string }> = ({ pdfUrl }) => {
+          const canvasRef = useRef<HTMLCanvasElement>(null);
+        
+          useEffect(() => {
+            const loadPdf = async () => {
+              try {
+                const loadingTask = PDFJS.getDocument(pdfUrl);
+                const pdf = await loadingTask.promise;
+                const page = await pdf.getPage(1); // Get the first page
+                
+                const viewport = page.getViewport({ scale: 1.5 });
+                
+                // Set canvas dimensions
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+                
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                // Render PDF page
+                await page.render({
+                  canvasContext: context as any,
+                  viewport: viewport
+                }).promise;
+              } catch (error) {
+                console.error('Error loading PDF:', error);
+              }
+            };
+            
+            loadPdf();
+          }, [pdfUrl]);
+        
+          
+          
+          const PdfViewer: React.FC = () => {
+            return (
+              <embed 
+                src="/path/to/your/document.pdf" 
+                type="application/pdf"
+                width="100%" 
+                height="600px" 
+              />
+            );
+          };
+
+  return ( 
     <div className="min-h-screen bg-slate-50 py-8">
       <div className="container mx-auto px-4">
         <Link href="/" className="mb-6 inline-block">
@@ -119,19 +211,14 @@ export default function DocumentsPage() {
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="border rounded p-4 h-64 overflow-auto">
-                        {/* This would be a PDF viewer in a real app */}
-                        <p className="text-sm">
-                          This is a placeholder for the PDF content of the SWMS document. In a real application, this
-                          would be an embedded PDF viewer showing the full Safe Work Method Statement.
-                        </p>
-                        <p className="text-sm mt-4">The document would detail:</p>
-                        <ul className="list-disc pl-5 text-sm mt-2 space-y-1">
-                          <li>Hazards and risks associated with the work</li>
-                          <li>Control measures to be implemented</li>
-                          <li>Personal protective equipment required</li>
-                          <li>Emergency procedures</li>
-                          <li>Responsible persons</li>
-                        </ul>
+                      <embed 
+                          src="documents/test.pdf" 
+                          type="application/pdf"
+                          width="100%" 
+                          height="600px" 
+                          />
+                      <canvas ref={canvasRef} />
+                         
                       </div>
                       {!doc.signed && (
                         <div className="grid gap-2">
@@ -164,6 +251,4 @@ export default function DocumentsPage() {
         </div>
       </div>
     </div>
-  )
-}
-
+  )}}
