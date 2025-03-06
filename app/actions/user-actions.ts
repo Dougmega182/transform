@@ -6,6 +6,7 @@ type SignInOutData = {
   name: string
   mobile: string
   company: string
+  jobSiteId: string
   action: "in" | "out"
   timestamp: string
 }
@@ -34,6 +35,7 @@ export async function signInOut(data: SignInOutData) {
     const signInRecord = await prisma.signInRecord.create({
       data: {
         userId: user.id,
+        jobSiteId: data.jobSiteId,
         action: data.action,
         timestamp: new Date(data.timestamp),
       },

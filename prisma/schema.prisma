@@ -24,6 +24,8 @@ model SignInRecord {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id])
+  jobSiteId String
+  jobSite   JobSite  @relation(fields: [jobSiteId], references: [id])
   action    String   // "in" or "out"
   timestamp DateTime @default(now())
 }
@@ -56,5 +58,12 @@ model SiteInduction {
   hazardsAcknowledged          Boolean
   ppeAcknowledged              Boolean
   timestamp                    DateTime @default(now())
+}
+
+model JobSite {
+  id            String        @id @default(cuid())
+  name          String
+  address       String?
+  signInRecords SignInRecord[]
 }
 

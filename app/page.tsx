@@ -1,8 +1,12 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { JobSiteSelector } from "@/components/job-site-selector"
+import { getJobSites } from "@/app/actions/job-site-actions"
 
-export default function Home() {
+export default async function Home() {
+  const jobSites = await getJobSites()
+
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-primary py-6">
@@ -12,6 +16,16 @@ export default function Home() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Select Job Site</CardTitle>
+            <CardDescription>Choose the job site you're working at today</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <JobSiteSelector jobSites={jobSites} onSelect={(jobSite) => console.log(jobSite)} />
+          </CardContent>
+        </Card>
+
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader>

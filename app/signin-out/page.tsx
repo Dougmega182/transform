@@ -2,9 +2,9 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -14,6 +14,8 @@ import { signInOut } from "@/app/actions/user-actions"
 
 export default function SignInOutPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const jobSiteId = searchParams.get("jobSiteId")
   const [name, setName] = useState("")
   const [mobile, setMobile] = useState("")
   const [company, setCompany] = useState("")
@@ -23,10 +25,22 @@ export default function SignInOutPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
+  useEffect(() => {
+    if (!jobSiteId) {
+      setError("No job site selected. Please go back and select a job site.")
+    }
+  }, [jobSiteId])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
+
+    if (!jobSiteId) {
+      setError("No job site selected. Please go back and select a job site.")
+      setLoading(false)
+      return
+    }
 
     try {
       // In a real app, we would check if the user has actually signed the SWMS and induction
@@ -42,6 +56,7 @@ export default function SignInOutPage() {
         name,
         mobile,
         company,
+        jobSiteId,
         action: isSigningIn ? "in" : "out",
         timestamp: new Date().toISOString(),
       })
