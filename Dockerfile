@@ -7,10 +7,13 @@ WORKDIR /app
 # Copy all files to the container
 COPY .  .
 COPY requirements.txt /app/requirements.txt
-# Install dependencies
+
+# Install build dependencies, necessary libraries, and compilers
 RUN chmod -R 755 /app
-RUN apk add --no-cache python3 py3-pip
-RUN apk add --no-cache gcc musl-dev python3-dev
+RUN apk add --no-cache python3 py3-pip gcc musl-dev python3-dev g++ libffi-dev linux-headers
+
+# Upgrade pip and install dependencies
+RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir --upgrade uvicorn
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -18,4 +21,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8000
 
 # Run the FastAPI application using Uvicorn
-CMD ["Uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000"]
