@@ -1,5 +1,5 @@
-# Use an official Python image as a base
-FROM python:3-alpine
+# Use a more complete Python base image (Debian-based)
+FROM python:3
 
 # Set the working directory
 WORKDIR /app
@@ -8,11 +8,8 @@ WORKDIR /app
 COPY .  .
 COPY requirements.txt /app/requirements.txt
 
-# Install system dependencies for building packages
+# Install dependencies
 RUN chmod -R 755 /app
-RUN apk add --no-cache python3 py3-pip gcc musl-dev python3-dev g++ libffi-dev linux-headers bash
-
-# Upgrade pip and install dependencies
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir --upgrade uvicorn
 
