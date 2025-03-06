@@ -1,23 +1,24 @@
-# Use a more complete Python base image (Debian-based)
-FROM python:3
+# Use the official Node.js image
+FROM node:18-alpine
 
 # Set the working directory
 WORKDIR /app
 
-# Copy all files to the container
-COPY .  .
-COPY requirements.txt /app/requirements.txt
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
 # Install dependencies
-RUN chmod -R 755 /app
-RUN pip install --no-cache-dir --upgrade pip
-RUN pip install --no-cache-dir --upgrade uvicorn
+RUN npm ci
 
-# Install all the packages listed in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy the rest of the application code
+COPY . .
 
-# Expose the port FastAPI runs on
-EXPOSE 8000
+# Build the Next.js application
+RUN npm run build
 
-# Run the FastAPI application using Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000"]
+# Expose the port the app runs on
+EXPOSE 3000
+
+# Start the application
+CMD ["npm", "start"]
+
