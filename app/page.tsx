@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { JobSiteSelector } from "@/components/job-site-selector";
 import { getJobSites } from "@/app/actions/job-site-actions";
-import ImageName from "app/documents/TransformHomes.jpg";
+
 
 export default function Home() {
   const [selectedJobSite, setSelectedJobSite] = useState<{ id: string; name: string } | null>(null);
@@ -41,7 +41,7 @@ export default function Home() {
       <header className="bg-primary py-6">
         <div className="container mx-auto px-4">
           <h1 className="text-2xl font-bold text-white">
-            <img src={ImageName} alt={"TransformHomes"} ></img>WorkSite Safety SignIn</h1>
+            <img src="app/documents/TransformHomes.jpg" alt={"TransformHomes"} ></img>WorkSite Safety SignIn</h1>
         </div>
       </header>
 
