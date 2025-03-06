@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String            @id @default(cuid())
+  name              String
+  mobile            String
+  company           String
+  signInRecords     SignInRecord[]
+  documentSignatures DocumentSignature[]
+  siteInductions    SiteInduction[]
+}
+
+model SignInRecord {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String   // "in" or "out"
+  timestamp DateTime @default(now())
+}
+
+model Document {
+  id          String              @id @default(cuid())
+  title       String
+  description String
+  signatures  DocumentSignature[]
+}
+
+model DocumentSignature {
+  id         String   @id @default(cuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id])
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  timestamp  DateTime @default(now())
+}
+
+model SiteInduction {
+  id                           String   @id @default(cuid())
+  userId                       String
+  user                         User     @relation(fields: [userId], references: [id])
+  emergencyContact             String
+  emergencyPhone               String
+  medicalConditions            String?
+  siteRulesAcknowledged        Boolean
+  emergencyProceduresAcknowledged Boolean
+  hazardsAcknowledged          Boolean
+  ppeAcknowledged              Boolean
+  timestamp                    DateTime @default(now())
+}
+
