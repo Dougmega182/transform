@@ -7,8 +7,14 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies
+# Install dependencies using npm ci (which installs based on package-lock.json)
 RUN npm ci --force
+
+# Copy the prisma folder containing the schema.prisma file
+COPY prisma ./prisma
+
+# Run Prisma generate to generate the client
+RUN npx prisma generate
 
 # Copy the rest of the application code
 COPY . .
@@ -16,8 +22,7 @@ COPY . .
 # Build the Next.js application
 RUN npm run build
 
-RUN npx prisma generate
-# Expose the port
+# Expose the port the app runs on
 EXPOSE 3000
 
 # Start the application
