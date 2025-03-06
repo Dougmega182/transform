@@ -50,13 +50,29 @@ model SiteInduction {
   id                           String   @id @default(cuid())
   userId                       String
   user                         User     @relation(fields: [userId], references: [id])
-  emergencyContact             String
-  emergencyPhone               String
-  medicalConditions            String?
-  siteRulesAcknowledged        Boolean
-  emergencyProceduresAcknowledged Boolean
-  hazardsAcknowledged          Boolean
-  ppeAcknowledged              Boolean
+  projectName                  String
+  projectManager               String
+  date                         DateTime @default(now())
+  contractorCompany            String
+  contractorName               String
+  jobDescription               String
+  plantInvolved                Boolean
+  plantInductionDetails        String?
+  highRiskWork                 String?
+  hotWorks                     Boolean
+  hotWorksPermit               Boolean
+  materialsApproval            String
+  termsAcknowledged            Boolean
+  behaviourAcknowledged        Boolean
+  competenciesAcknowledged     Boolean
+  safetyIssues                 String?
+  resolution                   String?
+  redWhiteCard                 String?
+  healthAcknowledged           Boolean
+  sanitaryWipesAcknowledged    Boolean
+  safetyAcknowledged           Boolean
+  signature                    String
+  acknowledgment               Boolean
   timestamp                    DateTime @default(now())
 }
 
@@ -66,4 +82,3 @@ model JobSite {
   address       String?
   signInRecords SignInRecord[]
 }
-

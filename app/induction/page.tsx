@@ -1,235 +1,129 @@
-"use client"
+import { useState } from "react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 
-import type React from "react"
+const jobSites = ["Site A", "Site B", "Site C"];
+const projectManagers = ["Oliver Trifunovski", "Matt Reid"];
+const highRiskLicences = [
+  "SB - Basic Scaffolding",
+  "SI - Intermediate Scaffolding",
+  "SA - Advanced Scaffolding",
+  "PB - Concrete Placing Boom Operator",
+  "CT, CV, CN, C2, C6, C1, C0 - Crane Operator",
+  "Other"
+];
 
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { submitInduction } from "@/app/actions/induction-actions"
-
-export default function InductionPage() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
+export default function InductionForm() {
   const [formData, setFormData] = useState({
-    name: "",
-    mobile: "",
-    company: "",
-    emergencyContact: "",
-    emergencyPhone: "",
-    medicalConditions: "",
-    acknowledgements: {
-      siteRules: false,
-      emergencyProcedures: false,
-      hazards: false,
-      ppe: false,
-    },
-  })
+    projectName: "",
+    projectManager: "",
+    date: new Date().toISOString().split("T")[0],
+    contractorCompany: "",
+    contractorName: "",
+    jobDescription: "",
+    plantInvolved: "no",
+    plantInduction: "",
+    highRiskWork: "",
+    hotWorks: "no",
+    hotWorksPermit: "no",
+    materialsApproval: "Agree",
+    siteRules: false,
+    signature: "",
+    redWhiteCard: null as File | null,
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
+  const [loading, setLoading] = useState(false);
 
-  const handleCheckboxChange = (field: keyof typeof formData.acknowledgements, checked: boolean) => {
-    setFormData((prev) => ({
-      ...prev,
-      acknowledgements: {
-        ...prev.acknowledgements,
-        [field]: checked,
-      },
-    }))
-  }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  
+  const handleCheckboxChange: React.FormEventHandler<HTMLButtonElement> = (e) => {
+    const target = e.currentTarget as HTMLInputElement;
+    setFormData({ ...formData, [target.name]: target.checked });
+  };
+  
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFormData({ ...formData, redWhiteCard: file });
+  };
+  
+  
+  
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-
-    try {
-      // Check if all acknowledgements are checked
-      const allAcknowledged = Object.values(formData.acknowledgements).every(Boolean)
-      if (!allAcknowledged) {
-        alert("You must acknowledge all site safety requirements")
-        setLoading(false)
-        return
-      }
-
-      // Submit the induction form
-      await submitInduction({
-        ...formData,
-        timestamp: new Date().toISOString(),
-      })
-
-      alert("Site induction completed successfully!")
-      router.push("/")
-    } catch (error) {
-      console.error("Error submitting induction:", error)
-      alert("An error occurred. Please try again.")
-    } finally {
-      setLoading(false)
-    }
-  }
+  const handleSubmit = () => {
+    setLoading(true);
+    console.log("Form Submitted", formData);
+    setTimeout(() => setLoading(false), 2000); // Simulate API call
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8">
-      <div className="container mx-auto px-4">
-        <Link href="/" className="mb-6 inline-block">
-          <Button variant="outline" size="sm">
-            ← Back to Home
-          </Button>
-        </Link>
+    <Card>
+      <CardContent className="space-y-4">
+        <label>Job Site</label>
+        <select name="projectName" value={formData.projectName} onChange={handleChange} required className="w-full border p-2">
+          <option value="">Select Job Site</option>
+          {jobSites.map((site) => (
+            <option key={site} value={site}>{site}</option>
+          ))}
+        </select>
 
-        <Card className="mx-auto max-w-2xl">
-          <CardHeader>
-            <CardTitle>Site Induction Form</CardTitle>
-            <CardDescription>Complete this form before starting work on site</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="mobile">Mobile Number</Label>
-                  <Input
-                    id="mobile"
-                    name="mobile"
-                    type="tel"
-                    value={formData.mobile}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </div>
+        <label>Project Manager</label>
+        <select name="projectManager" value={formData.projectManager} onChange={handleChange} required className="w-full border p-2">
+          <option value="">Select Project Manager</option>
+          {projectManagers.map((pm) => (
+            <option key={pm} value={pm}>{pm}</option>
+          ))}
+        </select>
 
-              <div className="space-y-2">
-                <Label htmlFor="company">Company</Label>
-                <Input id="company" name="company" value={formData.company} onChange={handleChange} required />
-              </div>
+        <Input type="date" name="date" value={formData.date} onChange={handleChange} required />
+        <Input type="text" name="contractorCompany" placeholder="Contractor Company Name" onChange={handleChange} required />
+        <Input type="text" name="contractorName" placeholder="Contractor Name" onChange={handleChange} required />
+        <Textarea name="jobDescription" placeholder="Description of job" onChange={handleChange} required />
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="emergencyContact">Emergency Contact Name</Label>
-                  <Input
-                    id="emergencyContact"
-                    name="emergencyContact"
-                    value={formData.emergencyContact}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="emergencyPhone">Emergency Contact Phone</Label>
-                  <Input
-                    id="emergencyPhone"
-                    name="emergencyPhone"
-                    type="tel"
-                    value={formData.emergencyPhone}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </div>
+        <label>Plant Involved?</label>
+        <label><input type="radio" name="plantInvolved" value="yes" onChange={handleChange} /> Yes</label>
+        <label><input type="radio" name="plantInvolved" value="no" onChange={handleChange} /> No</label>
 
-              <div className="space-y-2">
-                <Label htmlFor="medicalConditions">Medical Conditions (relevant to work)</Label>
-                <Textarea
-                  id="medicalConditions"
-                  name="medicalConditions"
-                  value={formData.medicalConditions}
-                  onChange={handleChange}
-                  placeholder="List any medical conditions that may be relevant to your work on site"
-                  className="min-h-[100px]"
-                />
-              </div>
+        <Textarea name="plantInduction" placeholder="Plant Induction Form Details" onChange={handleChange} />
+        
+        <label>High Risk Work Licences</label>
+        {highRiskLicences.map((licence) => (
+          <label key={licence}><input type="radio" name="highRiskWork" value={licence} onChange={handleChange} /> {licence}</label>
+        ))}
 
-              <div className="space-y-3 pt-2">
-                <h3 className="text-sm font-medium">Site Safety Acknowledgements</h3>
+        <label>Hot Works?</label>
+        <label><input type="radio" name="hotWorks" value="yes" onChange={handleChange} /> Yes</label>
+        <label><input type="radio" name="hotWorks" value="no" onChange={handleChange} /> No</label>
 
-                <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id="siteRules"
-                    checked={formData.acknowledgements.siteRules}
-                    onCheckedChange={(checked) => handleCheckboxChange("siteRules", checked === true)}
-                  />
-                  <div className="grid gap-1.5 leading-none">
-                    <Label
-                      htmlFor="siteRules"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      I have read and understood the site rules
-                    </Label>
-                  </div>
-                </div>
+        <label>Hot Works Permit?</label>
+        <label><input type="radio" name="hotWorksPermit" value="yes" onChange={handleChange} /> Yes</label>
+        <label><input type="radio" name="hotWorksPermit" value="no" onChange={handleChange} /> No</label>
 
-                <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id="emergencyProcedures"
-                    checked={formData.acknowledgements.emergencyProcedures}
-                    onCheckedChange={(checked) => handleCheckboxChange("emergencyProcedures", checked === true)}
-                  />
-                  <div className="grid gap-1.5 leading-none">
-                    <Label
-                      htmlFor="emergencyProcedures"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      I understand the emergency procedures and assembly points
-                    </Label>
-                  </div>
-                </div>
+        <label>Materials Approval</label>
+        <label><input type="radio" name="materialsApproval" value="Agree" onChange={handleChange} /> Agree</label>
+        <label><input type="radio" name="materialsApproval" value="Disagree" onChange={handleChange} /> Disagree</label>
+        <label><input type="radio" name="materialsApproval" value="N/A" onChange={handleChange} /> N/A</label>
 
-                <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id="hazards"
-                    checked={formData.acknowledgements.hazards}
-                    onCheckedChange={(checked) => handleCheckboxChange("hazards", checked === true)}
-                  />
-                  <div className="grid gap-1.5 leading-none">
-                    <Label
-                      htmlFor="hazards"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      I am aware of the site hazards and control measures
-                    </Label>
-                  </div>
-                </div>
+        <label>Upload Red/White Card</label>
+        <input type="file" name="redWhiteCard" onChange={handleFileChange} />
 
-                <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id="ppe"
-                    checked={formData.acknowledgements.ppe}
-                    onCheckedChange={(checked) => handleCheckboxChange("ppe", checked === true)}
-                  />
-                  <div className="grid gap-1.5 leading-none">
-                    <Label
-                      htmlFor="ppe"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      I will wear appropriate PPE at all times on site
-                    </Label>
-                  </div>
-                </div>
-              </div>
-            </form>
-          </CardContent>
-          <CardFooter>
-            <Button onClick={handleSubmit} disabled={loading} className="w-full">
-              {loading ? "Submitting..." : "Complete Induction"}
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    </div>
-  )
+        <label>
+          <Checkbox name="siteRules" checked={formData.siteRules} onChange={handleCheckboxChange} /> I acknowledge I have read and understood the site rules
+        </label>
+
+        <Textarea name="signature" placeholder="Print Your Name" onChange={handleChange} required />
+      </CardContent>
+
+      <CardFooter>
+        <Button onClick={handleSubmit} disabled={loading} className="w-full">
+          {loading ? "Submitting..." : "Complete Induction"}
+        </Button>
+      </CardFooter>
+    </Card>
+  );
 }
-
