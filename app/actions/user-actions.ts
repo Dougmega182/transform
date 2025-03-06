@@ -1,7 +1,5 @@
 "use server"
 
-import prisma from "@/lib/prisma"
-
 type SignInOutData = {
   name: string
   mobile: string
@@ -13,35 +11,20 @@ type SignInOutData = {
 
 export async function signInOut(data: SignInOutData) {
   try {
-    // First, find or create the user
-    let user = await prisma.user.findFirst({
-      where: {
-        name: data.name,
-        mobile: data.mobile,
+    const response = await fetch("/api/signin-out", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify(data),
     })
 
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          name: data.name,
-          mobile: data.mobile,
-          company: data.company,
-        },
-      })
+    if (!response.ok) {
+      throw new Error("Failed to record sign in/out")
     }
 
-    // Create the sign in/out record
-    const signInRecord = await prisma.signInRecord.create({
-      data: {
-        userId: user.id,
-        jobSiteId: data.jobSiteId,
-        action: data.action,
-        timestamp: new Date(data.timestamp),
-      },
-    })
-
-    return { success: true, signInRecord }
+    const result = await response.json()
+    return result
   } catch (error) {
     console.error("Error recording sign in/out:", error)
     throw new Error("Failed to record sign in/out")

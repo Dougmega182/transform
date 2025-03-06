@@ -1,11 +1,30 @@
+"use client"
+
+import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { JobSiteSelector } from "@/components/job-site-selector"
 import { getJobSites } from "@/app/actions/job-site-actions"
 
-export default async function Home() {
-  const jobSites = await getJobSites()
+export default function Home() {
+  const [selectedJobSite, setSelectedJobSite] = useState<{ id: string; name: string } | null>(null)
+  const router = useRouter()
+
+  const handleSignInOut = () => {
+    if (selectedJobSite) {
+      router.push(`/signin-out?jobSiteId=${selectedJobSite.id}`)
+    } else {
+      alert("Please select a job site before proceeding.")
+    }
+  }
+
+  const getJobSitesAsync = async () => {
+    return await getJobSites()
+  }
+
+  const jobSitesPromise = getJobSitesAsync()
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -22,7 +41,7 @@ export default async function Home() {
             <CardDescription>Choose the job site you're working at today</CardDescription>
           </CardHeader>
           <CardContent>
-            <JobSiteSelector jobSites={jobSites} onSelect={(jobSite) => console.log(jobSite)} />
+            <JobSiteSelector jobSites={await jobSitesPromise} onSelect={setSelectedJobSite} />
           </CardContent>
         </Card>
 
@@ -36,9 +55,9 @@ export default async function Home() {
               <p className="mb-4">Sign in or out of your current worksite and confirm safety compliance.</p>
             </CardContent>
             <CardFooter>
-              <Link href="/signin-out" className="w-full">
-                <Button className="w-full">Sign In/Out</Button>
-              </Link>
+              <Button className="w-full" onClick={handleSignInOut}>
+                Sign In/Out
+              </Button>
             </CardFooter>
           </Card>
 

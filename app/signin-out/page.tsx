@@ -43,16 +43,13 @@ export default function SignInOutPage() {
     }
 
     try {
-      // In a real app, we would check if the user has actually signed the SWMS and induction
-      // For now, we'll just rely on the checkboxes
       if (isSigningIn && (!swmsChecked || !inductionChecked)) {
         setError("You must confirm you have signed the required documents")
         setLoading(false)
         return
       }
 
-      // Call the server action to record the sign in/out
-      await signInOut({
+      const result = await signInOut({
         name,
         mobile,
         company,
@@ -61,9 +58,12 @@ export default function SignInOutPage() {
         timestamp: new Date().toISOString(),
       })
 
-      // Show success message and redirect
-      alert(`Successfully signed ${isSigningIn ? "in" : "out"}!`)
-      router.push("/")
+      if (result.success) {
+        alert(`Successfully signed ${isSigningIn ? "in" : "out"}!`)
+        router.push("/")
+      } else {
+        setError(result.error || "An error occurred. Please try again.")
+      }
     } catch (err) {
       setError("An error occurred. Please try again.")
       console.error(err)
