@@ -7,6 +7,14 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
+# Remove the conflicting packages
+RUN npm uninstall date-fns react-day-picker
+
+# Install compatible versions
+RUN npm install date-fns@3.6.0 react-day-picker@8.10.1
+
+# Use legacy-peer-deps flag for npm ci
+RUN npm ci --legacy-peer-deps
 # Install dependencies
 RUN npm ci
 
