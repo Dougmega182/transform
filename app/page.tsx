@@ -22,12 +22,8 @@ export default function Home() {
 
   const getJobSitesAsync = async () => {
     try {
-      return await getJobSites()
-    } catch (error) {
-      console.error("Error fetching job sites:", error)
-      throw error // Re-throw or handle as needed
-    }
-  }
+      return getJobSites()
+    } }
 
   const jobSitesPromise = getJobSitesAsync()
 
