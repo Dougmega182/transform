@@ -4,11 +4,12 @@ from dotenv import load_dotenv
 from typing import Optional
 import uvicorn
 
-app = FastAPI()
+
 
 
 # Load environment variables from .env
 load_dotenv()
+app = FastAPI()
 
 @app.get("/")
 def read_root():
