@@ -10,7 +10,6 @@ COPY requirements.txt /app/requirements.txt
 # Install dependencies
 RUN chmod -R 755 /app
 RUN apk add --no-cache python3 py3-pip
-RUN apt-get update && apt-get install -y python3-pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose the port FastAPI runs on
