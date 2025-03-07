@@ -1,5 +1,5 @@
-# Use a Debian-based Node.js image
-FROM node:18-bullseye
+# Use the official Node.js 18 image as a parent image
+FROM node:18-alpine
 
 # Set the working directory
 WORKDIR /app
@@ -7,23 +7,18 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies using npm ci (which installs based on package-lock.json)
-RUN npm ci --force
+# Install dependencies
+RUN npm ci
 
-# Copy the prisma folder containing the schema.prisma file
-COPY prisma ./prisma
-
-# Run Prisma generate to generate the client
-RUN npx prisma generate
-
-# Copy the rest of the application code
+# Copy the rest of your app's source code
 COPY . .
 
-# Build the Next.js application
+# Build your Next.js app
 RUN npm run build
 
-# Expose the port the app runs on
+# Expose the port your app runs on
 EXPOSE 3000
 
-# Start the application
+# Start the app
 CMD ["npm", "start"]
+

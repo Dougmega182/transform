@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -20,6 +17,14 @@ model User {
   siteInductions    SiteInduction[]
 }
 
+model JobSite {
+  id            String        @id @default(cuid())
+  name          String
+  address       String?
+  signInRecords SignInRecord[]
+  siteInductions SiteInduction[]
+}
+
 model SignInRecord {
   id        String   @id @default(cuid())
   userId    String
@@ -34,6 +39,7 @@ model Document {
   id          String              @id @default(cuid())
   title       String
   description String
+  pdfUrl      String
   signatures  DocumentSignature[]
 }
 
@@ -48,37 +54,71 @@ model DocumentSignature {
 
 model SiteInduction {
   id                           String   @id @default(cuid())
+  jobSiteId                    String
+  jobSite                     JobSite  @relation(fields: [jobSiteId], references: [id])
   userId                       String
-  user                         User     @relation(fields: [userId], references: [id])
-  projectName                  String
-  projectManager               String
-  date                         DateTime @default(now())
-  contractorCompany            String
-  contractorName               String
-  jobDescription               String
-  plantInvolved                Boolean
-  plantInductionDetails        String?
-  highRiskWork                 String?
-  hotWorks                     Boolean
-  hotWorksPermit               Boolean
-  materialsApproval            String
-  termsAcknowledged            Boolean
-  behaviourAcknowledged        Boolean
-  competenciesAcknowledged     Boolean
-  safetyIssues                 String?
-  resolution                   String?
-  redWhiteCard                 String?
-  healthAcknowledged           Boolean
-  sanitaryWipesAcknowledged    Boolean
-  safetyAcknowledged           Boolean
-  signature                    String
-  acknowledgment               Boolean
-  timestamp                    DateTime @default(now())
+  user                        User     @relation(fields: [userId], references: [id])
+  projectManager              String
+  inductionDate               DateTime
+  contractorCompany           String
+  contractorName              String
+  jobDescription             String
+  usesPlant                  Boolean
+  plantInductionDetails      String?
+  highRiskWorkLicence        String?
+  requiresHotWorks           Boolean
+  hotWorksPermitCompleted    Boolean?
+  materialsApproval          String
+  
+  // Terms and Conditions Acknowledgements
+  tcSecurityAccess           Boolean
+  tcDamageResponsibility     Boolean
+  tcRubbishRemoval           Boolean
+  tcIncidentReporting        Boolean
+  tcSafetyClothing          Boolean
+  tcNoSmoking               Boolean
+  tcDrugsAlcohol            Boolean
+  tcSunSmart                Boolean
+  tcFoodWaste               Boolean
+
+  // Behavior Standards Acknowledgements
+  bsNoBullying              Boolean
+  bsNoTheft                 Boolean
+  bsSafetyInstructions      Boolean
+  bsSafetyControls          Boolean
+  bsScaffolding             Boolean
+  bsJoineryProtection       Boolean
+
+  // Competencies
+  swmsProvided              Boolean
+  constructionInduction     Boolean
+  
+  // Safety Concerns
+  safetyIssuesIdentified    Boolean
+  safetyIssuesDescription   String?
+  safetyIssuesResolution    String?
+  
+  // Documents
+  whiteCardPhoto            String?
+  
+  // Health and Safety Briefing
+  facilitiesShown           Boolean
+  workAreaShown             Boolean
+  sanitaryWipesAcknowledged Boolean
+  
+  // Safety Procedures
+  hazardBoardReviewed       Boolean
+  ohsPlanLocation           Boolean
+  incidentProcedure         Boolean
+  emergencyProcedure        Boolean
+  ppeProcedure             Boolean
+  securityProcedure        Boolean
+  questionsAnswered        Boolean
+
+  // Final Acknowledgement
+  inducteeSignature        String
+  acknowledgement          Boolean
+  
+  timestamp               DateTime @default(now())
 }
 
-model JobSite {
-  id            String        @id @default(cuid())
-  name          String
-  address       String?
-  signInRecords SignInRecord[]
-}

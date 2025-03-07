@@ -2,61 +2,78 @@
 
 import prisma from "@/lib/prisma"
 
-type InductionData = {
-  name: string
-  mobile: string
+export type InductionData = {
+  project: string
+  manager: string
+  date: Date
   company: string
-  emergencyContact: string
-  emergencyPhone: string
-  medicalConditions: string
-  acknowledgements: {
-    siteRules: boolean
-    emergencyProcedures: boolean
-    hazards: boolean
-    ppe: boolean
-  }
-  timestamp: string
+  name: string
+  description: string
+  plant: string
+  plantInduction?: string
+  highRiskLicence?: string
+  hotWorks: string
+  materials: string
+  terms: boolean
 }
 
 export async function submitInduction(data: InductionData) {
   try {
-    // Find or create the user
-    let user = await prisma.user.findFirst({
-      where: {
-        name: data.name,
-        mobile: data.mobile,
-      },
-    })
-
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          name: data.name,
-          mobile: data.mobile,
-          company: data.company,
-        },
-      })
-    }
-
-    // Create the site induction record
-    const induction = await prisma.siteInduction.create({
+    // Map the form data to the database schema
+    const inductionRecord = await prisma.siteInduction.create({
       data: {
-        userId: user.id,
-        emergencyContact: data.emergencyContact,
-        emergencyPhone: data.emergencyPhone,
-        medicalConditions: data.medicalConditions,
-        siteRulesAcknowledged: data.acknowledgements.siteRules,
-        emergencyProceduresAcknowledged: data.acknowledgements.emergencyProcedures,
-        hazardsAcknowledged: data.acknowledgements.hazards,
-        ppeAcknowledged: data.acknowledgements.ppe,
-        timestamp: new Date(data.timestamp),
+        jobSiteId: data.project, // Assuming project is the jobSiteId
+        projectManager: data.manager,
+        inductionDate: data.date,
+        contractorCompany: data.company,
+        contractorName: data.name,
+        jobDescription: data.description,
+        usesPlant: data.plant === "yes",
+        plantInductionDetails: data.plantInduction,
+        highRiskWorkLicence: data.highRiskLicence,
+        requiresHotWorks: data.hotWorks === "yes",
+        materialsApproval: data.materials,
+        // Set default values for other required fields
+        tcSecurityAccess: false,
+        tcDamageResponsibility: false,
+        tcRubbishRemoval: false,
+        tcIncidentReporting: false,
+        tcSafetyClothing: false,
+        tcNoSmoking: false,
+        tcDrugsAlcohol: false,
+        tcSunSmart: false,
+        tcFoodWaste: false,
+        bsNoBullying: false,
+        bsNoTheft: false,
+        bsSafetyInstructions: false,
+        bsSafetyControls: false,
+        bsScaffolding: false,
+        bsJoineryProtection: false,
+        swmsProvided: false,
+        constructionInduction: false,
+        safetyIssuesIdentified: false,
+        facilitiesShown: false,
+        workAreaShown: false,
+        sanitaryWipesAcknowledged: false,
+        hazardBoardReviewed: false,
+        ohsPlanLocation: false,
+        incidentProcedure: false,
+        emergencyProcedure: false,
+        ppeProcedure: false,
+        securityProcedure: false,
+        questionsAnswered: false,
+        inducteeSignature: "",
+        acknowledgement: data.terms,
+        userId: "example-user-id", // In a real app, get this from the session
       },
     })
 
-    return { success: true, induction }
+    console.log("Induction submitted:", inductionRecord)
+
+    return { success: true, inductionRecord }
   } catch (error) {
-    console.error("Error submitting induction form:", error)
-    throw new Error("Failed to submit induction form")
+    console.error("Error submitting induction:", error)
+    return { success: false, error: error instanceof Error ? error.message : "An unknown error occurred" }
   }
 }
 

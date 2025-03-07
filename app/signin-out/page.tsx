@@ -4,21 +4,28 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { signInOut } from "@/app/actions/user-actions"
+import { getJobSites } from "@/app/actions/job-site-actions"
+
+type JobSite = {
+  id: string
+  name: string
+}
 
 export default function SignInOutPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const jobSiteId = searchParams.get("jobSiteId")
   const [name, setName] = useState("")
   const [mobile, setMobile] = useState("")
   const [company, setCompany] = useState("")
+  const [jobSiteId, setJobSiteId] = useState("")
+  const [jobSites, setJobSites] = useState<JobSite[]>([])
   const [isSigningIn, setIsSigningIn] = useState(true)
   const [swmsChecked, setSwmsChecked] = useState(false)
   const [inductionChecked, setInductionChecked] = useState(false)
@@ -26,10 +33,17 @@ export default function SignInOutPage() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    if (!jobSiteId) {
-      setError("No job site selected. Please go back and select a job site.")
+    async function fetchJobSites() {
+      try {
+        const sites = await getJobSites()
+        setJobSites(sites)
+      } catch (error) {
+        console.error("Failed to fetch job sites:", error)
+        setError("Failed to load job sites. Please try again.")
+      }
     }
-  }, [jobSiteId])
+    fetchJobSites()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,7 +51,7 @@ export default function SignInOutPage() {
     setError("")
 
     if (!jobSiteId) {
-      setError("No job site selected. Please go back and select a job site.")
+      setError("Please select a job site")
       setLoading(false)
       return
     }
@@ -65,8 +79,8 @@ export default function SignInOutPage() {
         setError(result.error || "An error occurred. Please try again.")
       }
     } catch (err) {
-      setError("An error occurred. Please try again.")
-      console.error(err)
+      console.error("Error during sign in/out:", err)
+      setError(`An error occurred: ${err instanceof Error ? err.message : String(err)}`)
     } finally {
       setLoading(false)
     }
@@ -105,6 +119,22 @@ export default function SignInOutPage() {
               <div className="space-y-2">
                 <Label htmlFor="company">Company Name</Label>
                 <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="jobSite">Job Site</Label>
+                <Select value={jobSiteId} onValueChange={setJobSiteId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a job site" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jobSites.map((site) => (
+                      <SelectItem key={site.id} value={site.id}>
+                        {site.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {isSigningIn && (

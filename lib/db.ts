@@ -1,6 +1,3 @@
-// This is a placeholder for the database connection
-// In a real app, this would be a connection to your Railway PostgreSQL database
-
 export const db = {
   // This would be replaced with your actual database client
   // For example, with Prisma:
