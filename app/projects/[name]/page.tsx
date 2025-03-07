@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FileText, Bell, Briefcase, FileCheck } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function ProjectPage() {
   const params = useParams()
@@ -24,10 +26,10 @@ export default function ProjectPage() {
         </div>
 
         <div className="flex justify-between mb-6">
-          <IconButton icon={<FileText size={20} />} label="Inductions" />
-          <IconButton icon={<Bell size={20} />} label="SWMS" />
-          <IconButton icon={<Briefcase size={20} />} label="Permits" />
-          <IconButton icon={<FileCheck size={20} />} label="Forms" />
+          <a href="./induction/page.tsx"><IconButton icon={<FileText size={20} />} label="Inductions"/> </a>
+          <a href="./documents/page.tsx"></a><IconButton icon={<Bell size={20} />} label="SWMS" />
+          <a href="./induction/page.tsx"></a><IconButton icon={<Briefcase size={20} />} label="Permits" />
+          <a href="./induction/page.tsx"></a><IconButton icon={<FileCheck size={20} />} label="Forms" />
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -42,34 +44,19 @@ export default function ProjectPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start">
+                <a href="./induction/page.tsx"><Button variant="outline" className="w-full justify-start">
                     Complete Site Induction
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
+                  </Button></a>
+                  <a href="./documents/page.tsx"><Button variant="outline" className="w-full justify-start">
                     Acknowledge SWMS
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    Acknowledge Daily Briefing
-                  </Button>
+                  </Button></a>
+                  <a href="./signin-out/page.tsx"><Button variant="outline" className="w-full justify-start">
+                    Sign in to site
+                  </Button></a>
                 </div>
               </CardContent>
             </Card>
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle>Briefings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Pre-start briefing</p>
-                    <p className="text-sm text-gray-500">7:38am, 15 Sep 2023 • Jane Maizin</p>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    View
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            
           </TabsContent>
           <TabsContent value="details">
             {/* Add project details content here */}
@@ -78,7 +65,9 @@ export default function ProjectPage() {
                 <CardTitle>Project Details</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Project details content goes here...</p>
+                <p>
+                  <Label htmlFor="jobSite"></Label>
+                <Select value={jobSiteDetails}/> </p>
               </CardContent>
             </Card>
           </TabsContent>

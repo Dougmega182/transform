@@ -21,6 +21,7 @@ model JobSite {
   id            String        @id @default(cuid())
   name          String
   address       String?
+  details       String
   signInRecords SignInRecord[]
   siteInductions SiteInduction[]
 }
