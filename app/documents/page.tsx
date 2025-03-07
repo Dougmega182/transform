@@ -16,7 +16,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { FileText, CheckCircle } from "lucide-react"
-import { signDocument } from "@/app/actions/document-actions"
 import * as PDFJS from 'pdfjs-dist';
 import { useEffect, useRef } from 'react';
 
@@ -45,123 +44,111 @@ const documents = [
 // Set the worker source
 PDFJS.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS.version}/pdf.worker.min.js`;
 
-  export default function DocumentsPage() {
-  const [docs, setDocs] = useState(documents)
-  const [selectedDoc, setSelectedDoc] = useState<(typeof documents)[0] | null>(null)
-  const [name, setName] = useState("")
-  const [loading, setLoading] = useState(false)
+// Define signature data interface
+interface SignatureData {
+  documentId: string;
+  name: string;
+  timestamp: string;
+}
+
+// Function to call the server
+const signDocumentApi = async (signatureData: SignatureData) => {
+  const response = await fetch('https://postgres-production-5236.up.railway.app/api/signatures', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(signatureData)
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error signing document: ${response.statusText}`);
+  }
+
+  return await response.json();
+};
+
+// PDF Viewer Component
+const PdfViewerComponent = ({ pdfUrl }: { pdfUrl: string }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const loadPdf = async () => {
+      try {
+        const loadingTask = PDFJS.getDocument(pdfUrl);
+        const pdf = await loadingTask.promise;
+        const page = await pdf.getPage(1); // Get the first page
+        
+        const viewport = page.getViewport({ scale: 1.5 });
+        
+        // Set canvas dimensions
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        
+        // Render PDF page
+        await page.render({
+          canvasContext: context as any,
+          viewport: viewport
+        }).promise;
+      } catch (error) {
+        console.error('Error loading PDF:', error);
+      }
+    };
+    
+    loadPdf();
+  }, [pdfUrl]);
+
+  return <canvas ref={canvasRef} />;
+};
+
+// Simple PDF Embed Component
+const PdfEmbed = ({ pdfUrl }: { pdfUrl: string }) => {
+  return (
+    <embed 
+      src={pdfUrl} 
+      type="application/pdf"
+      width="100%" 
+      height="600px" 
+    />
+  );
+};
+
+export default function DocumentsPage() {
+  const [docs, setDocs] = useState(documents);
+  const [selectedDoc, setSelectedDoc] = useState<(typeof documents)[0] | null>(null);
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSignDocument = async () => {
-    if (!selectedDoc || !name) return
+    if (!selectedDoc || !name) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
-      // Define your signature data interface
-      interface SignatureData {
-        documentId: string;
-        name: string;
-        timestamp: string;
-      };
+      // Call the API to sign the document
+      const result = await signDocumentApi({
+        documentId: selectedDoc.id,
+        name,
+        timestamp: new Date().toISOString(),
+      });
+      
+      console.log("Document signed successfully:", result);
+      
+      // Update the local state to show the document as signed
+      setDocs(docs.map((doc) => (doc.id === selectedDoc.id ? { ...doc, signed: true } : doc)));
 
-      // Create a function to call your server
-      const signDocument = async (signatureData: SignatureData) => {
-        const response = await fetch('https://postgres-production-5236.up.railway.app/api/signatures', {
-         method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            // Add authorization header if needed
-            // 'Authorization': `Bearer ${yourAuthToken}`
-          },
-          body: JSON.stringify(signatureData)
-        });
-  
-        if (!response.ok) {
-         throw new Error(`Error signing document: ${response.statusText}`);
-        }
-  
-        return await response.json();
-      };
-
-      setLoading(true);
-        try {
-          // Now this will call the actual server endpoint
-          const result = await signDocument({
-            documentId: selectedDoc.id,
-            name,
-            timestamp: new Date().toISOString(),
-          });
-    
-          // Handle successful signature
-          console.log("Document signed successfully:", result);
-          // Maybe update UI or navigate to another page
-    
-        } 
-          catch (error) {
-          console.error("Failed to sign document:", error);
-          // Handle errors - show message to user
-        } 
-          finally {
-          setLoading(false);
-        }
-            // Update the local state to show the document as signed
-            setDocs(docs.map((doc) => (doc.id === selectedDoc.id ? { ...doc, signed: true } : doc)))
-
-            // Close the dialog by setting selectedDoc to null
-            setSelectedDoc(null)
-            setName("")
-          } 
-            catch (error) {
-            console.error("Error signing document:", error)
-          } 
-            finally {
-            setLoading(false)
-          }
-        };
-        const PdfViewerComponent: React.FC<{ pdfUrl: string }> = ({ pdfUrl }) => {
-          const canvasRef = useRef<HTMLCanvasElement>(null);
-        
-          useEffect(() => {
-            const loadPdf = async () => {
-              try {
-                const loadingTask = PDFJS.getDocument(pdfUrl);
-                const pdf = await loadingTask.promise;
-                const page = await pdf.getPage(1); // Get the first page
-                
-                const viewport = page.getViewport({ scale: 1.5 });
-                
-                // Set canvas dimensions
-                const canvas = canvasRef.current;
-                if (!canvas) return;
-                
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-                
-                // Render PDF page
-                await page.render({
-                  canvasContext: context as any,
-                  viewport: viewport
-                }).promise;
-              } catch (error) {
-                console.error('Error loading PDF:', error);
-              }
-            };
-            
-            loadPdf();
-          }, [pdfUrl]);
-        
-          
-          
-          const PdfViewer: React.FC = () => {
-            return (
-              <embed 
-                src="/path/to/your/document.pdf" 
-                type="application/pdf"
-                width="100%" 
-                height="600px" 
-              />
-            );
-          };
+      // Clear form
+      setSelectedDoc(null);
+      setName("");
+    } catch (error) {
+      console.error("Error signing document:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return ( 
     <div className="min-h-screen bg-slate-50 py-8">
@@ -211,16 +198,9 @@ PDFJS.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="border rounded p-4 h-64 overflow-auto">
-                      <embed 
-                          src="documents/test.pdf" 
-                          type="application/pdf"
-                          width="100%" 
-                          height="600px" 
-                          />
-                      <canvas ref={canvasRef} />
-                         
+                        <PdfEmbed pdfUrl="documents/test.pdf" />
                       </div>
-                      {!doc.signed && (
+                      {selectedDoc && !selectedDoc.signed && (
                         <div className="grid gap-2">
                           <Label htmlFor="signature">Sign with your full name to acknowledge</Label>
                           <Input
@@ -233,7 +213,7 @@ PDFJS.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
                       )}
                     </div>
                     <DialogFooter>
-                      {!doc.signed ? (
+                      {selectedDoc && !selectedDoc.signed ? (
                         <Button onClick={handleSignDocument} disabled={!name || loading}>
                           {loading ? "Signing..." : "Sign Document"}
                         </Button>
@@ -251,4 +231,5 @@ PDFJS.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
         </div>
       </div>
     </div>
-  )}}
+  )
+}
