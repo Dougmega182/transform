@@ -59,7 +59,7 @@ export default function ProjectPage() {
             
           </TabsContent>
           <TabsContent value="details">
-            {/* Add project details content here */}
+          <Select value={jobSiteDetails}/> 
             <Card>
               <CardHeader>
                 <CardTitle>Project Details</CardTitle>
@@ -67,7 +67,7 @@ export default function ProjectPage() {
               <CardContent>
                 <p>
                   <Label htmlFor="jobSite"></Label>
-                <Select value={jobSiteDetails}/> </p>
+                  </p>
               </CardContent>
             </Card>
           </TabsContent>

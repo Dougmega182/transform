@@ -1,5 +1,5 @@
-# Use the official Node.js 18 image as a parent image
-FROM node:18-alpine
+# Use the official Node.js 18 image as a base
+FROM node:18-bullseye
 
 # Set the working directory
 WORKDIR /app
@@ -10,15 +10,17 @@ COPY package*.json ./
 # Install dependencies
 RUN npm ci
 
-# Copy the rest of your app's source code
+# Copy the entire application
 COPY . .
+
+# Generate Prisma client before building the app
+RUN npx prisma generate
 
 # Build your Next.js app
 RUN npm run build
 
-# Expose the port your app runs on
+# Expose the app's port
 EXPOSE 3000
 
 # Start the app
 CMD ["npm", "start"]
-
