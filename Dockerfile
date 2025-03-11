@@ -1,8 +1,5 @@
 # Stage 1: Dependencies
 FROM node:18-alpine AS deps
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
-COPY package.json package-lock.json* ./
 RUN npm install
 
 # Stage 2: Builder
@@ -10,8 +7,7 @@ FROM node:18-bullseye AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN apt-get update && apt-get install -y build-essential libssl-dev zlib1g-dev libbz2-dev \
-    libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
-    tk-dev libffi-dev liblzma-dev python-openssl git
+    libreadline-dev libsqlite3-dev wget curl git
 
 COPY . .
 
