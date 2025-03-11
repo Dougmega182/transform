@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const userNextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
-}
+};
 
-module.exports = nextConfig
-
+export default userNextConfig;
