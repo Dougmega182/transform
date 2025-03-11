@@ -1,6 +1,5 @@
 # Stage 1: Dependencies
 FROM node:18-alpine AS deps
-FROM railway/railway:latest-glibc
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
