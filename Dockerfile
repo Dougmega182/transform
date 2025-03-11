@@ -1,9 +1,14 @@
 # Stage 1: Dependencies
 FROM node:18-alpine AS deps
-RUN npm install prisma
+
+WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm install --prefer-offline --fetch-rev --production && \
+    npm prune --production && \
+    npm dedupe
+
+COPY . .
 
 # Stage 2: Builder
 FROM node:18-bullseye AS builder
