@@ -3,9 +3,7 @@ FROM node:18-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json* ./
-COPY . .
-COPY --from=node:18-node_modules /usr/lib/node_modules/ @next/swc-linux-x64-gnu /app/node_modules/@next/swc-linux-x64-gnu
-# Removed the RUN npm install command, as we're copying pre-installed modules
+RUN npm install
 
 # Stage 2: Builder
 FROM node:18-bullseye AS builder
