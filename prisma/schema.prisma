@@ -19,7 +19,6 @@ model User {
   attendances   Attendance[]
   inductions    InductionCompletion[]
   swmsSignoffs  SwmsSignoff[]
-  createdSites  JobSite[]  @relation("SiteCreator")
   createdSwms   Swms[]     @relation("SwmsCreator")
 }
 
@@ -34,8 +33,7 @@ model JobSite {
   name          String
   address       String
   description   String?
-   // Relations
-  createdBy     User      @relation("SiteCreator", fields: [createdById], references: [id])
+  // Relations
   attendances   Attendance[]
   inductions    Induction[]
   swms          Swms[]
