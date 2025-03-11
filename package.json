@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "prisma": {
-  "schema": "./path/to/schema.prisma"
+  "schema": "./prisma/schema.prisma"
   },
 
   "dependencies": {
