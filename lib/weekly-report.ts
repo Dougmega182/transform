@@ -131,36 +131,19 @@ export async function generateWeeklyReport() {
       },
     })
 
-    // Send email
-    await sendReportEmail(reportData, report.id)
-
-    // Update report with sent timestamp
-    await prisma.weeklyReport.update({
-      where: { id: report.id },
-      data: { sentAt: new Date() },
+    // Create email transport
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: process.env.SMTP_SECURE === "true",
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
+      },
     })
 
-    return { success: true, reportId: report.id }
-  } catch (error) {
-    console.error("Error generating weekly report:", error)
-    return { success: false, error }
-  }
-}
-
-async function sendReportEmail(reportData: any, reportId: string) {
-  // Create email transport
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.example.com",
-    port: Number.parseInt(process.env.SMTP_PORT || "587"),
-    secure: process.env.SMTP_SECURE === "true",
-    auth: {
-      user: process.env.SMTP_USER || "user@example.com",
-      pass: process.env.SMTP_PASSWORD || "password",
-    },
-  })
-
-  // Generate HTML content
-  const htmlContent = `
+    // Generate HTML content
+    const htmlContent = `
     <h1>Weekly Site Activity Report</h1>
     <p>Week: ${reportData.weekStarting} to ${reportData.weekEnding}</p>
     
@@ -202,12 +185,24 @@ async function sendReportEmail(reportData: any, reportId: string) {
     <p>View detailed report in the admin dashboard.</p>
   `
 
-  // Send email
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM || "noreply@example.com",
-    to: process.env.REPORT_EMAIL || "admin@example.com",
-    subject: `Weekly Site Activity Report: ${reportData.weekStarting} to ${reportData.weekEnding}`,
-    html: htmlContent,
-  })
+    // Send email
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM,
+      to: process.env.REPORT_EMAIL,
+      subject: `Weekly Site Activity Report: ${reportData.weekStarting} to ${reportData.weekEnding}`,
+      html: htmlContent,
+    })
+
+    // Update report with sent timestamp
+    await prisma.weeklyReport.update({
+      where: { id: report.id },
+      data: { sentAt: new Date() },
+    })
+
+    return { success: true, reportId: report.id }
+  } catch (error) {
+    console.error("Error generating weekly report:", error)
+    return { success: false, error }
+  }
 }
 

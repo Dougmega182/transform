@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server"
 import { generateWeeklyReport } from "@/lib/weekly-report"
 
-// This endpoint should be called by a cron job every Monday at 9am
-// You can set up a cron job on Railway or use a service like Upstash Qstash
-
 export async function GET(request: Request) {
   try {
-    // Verify the request is authorized (you might want to add a secret token check)
+    // Verify the request is authorized using the CRON_SECRET
     const authHeader = request.headers.get("authorization")
     const expectedToken = process.env.CRON_SECRET
 
