@@ -5,7 +5,8 @@ WORKDIR /app
 
 COPY package.json package-lock.json* ./
 COPY . .
-RUN npm ci
+RUN npm install @next/swc-linux-x64-gnu @next/swc-linux-x64-musl
+RUN npm ci 
 
 # Stage 2: Builder
 FROM node:18-alpine AS builder
