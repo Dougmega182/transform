@@ -5,7 +5,7 @@ WORKDIR /app
 
 COPY package.json package-lock.json* ./
 COPY . .
-RUN npm install @next/swc-linux-x64-gnu @next/swc-linux-x64-musl
+RUN npm install @next/swc-linux-x64-gnu 
 RUN npm ci 
 
 # Stage 2: Builder
