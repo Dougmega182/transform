@@ -9,7 +9,9 @@ RUN npm install @next/swc-linux-x64-gnu
 RUN npm ci 
 
 # Stage 2: Builder
-FROM node:18-alpine AS builder
+FROM node:18-bullseye AS builder
+RUN apk add --no-cache libc6-compat
+
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
