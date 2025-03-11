@@ -1,6 +1,8 @@
 generator client {
   provider = "prisma-client-js"
 }
+require('dotenv').config({path: '../../.env', });
+const { DATABASE_URL } = process.env;
 
 datasource db {
   provider = "postgresql"
