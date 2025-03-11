@@ -8,6 +8,10 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "prisma": {
+  "schema": "./path/to/schema.prisma"
+  },
+
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "^1.2.2",
