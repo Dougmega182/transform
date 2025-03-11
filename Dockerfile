@@ -7,24 +7,31 @@ RUN npm install
 
 # Stage 2: Builder
 FROM node:18-bullseye AS builder
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+COPY package*.json ./
+RUN apt-get update && apt-get install -y build-essential libssl-dev zlib1g-dev libbz2-dev \
+    libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
+    tk-dev libffi-dev liblzma-dev python-openssl git
+
 COPY . .
+
 ENV NEXT_TELEMETRY_DISABLED 1
 RUN npm run build
 
 # Stage 3: Runner
 FROM node:18-alpine AS runner
 WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+COPY package*.json ./
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./next
+COPY --from=builder /app/.next/static ./static
+
+RUN npm install
+
+USER nextjs
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-USER nextjs
 EXPOSE 3000
 ENV PORT 3000
 CMD ["node", "server.js"]
