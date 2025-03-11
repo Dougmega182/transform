@@ -44,6 +44,7 @@
     "@tailwindcss/forms": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "@types/jsonwebtoken": "^9.0.3",
     "autoprefixer": "^10.4.20",
     "bcryptjs": "latest",
     "class-variance-authority": "^0.7.1",

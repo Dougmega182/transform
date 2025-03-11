@@ -4,17 +4,13 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("postgresql://postgres:eFcEceuvVmCQYOkPthZNLggVWuTiIbDV@gondola.proxy.rlwy.net:58054/railway")
+  url = "postgresql://postgres:eFcEceuvVmCQYOkPthZNLggVWuTiIbDV@gondola.proxy.rlwy.net:58054/railway"
 }
 
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String    @unique
-  password      String
-  role          Role      @default(USER)
   company       String?
-  position      String?
   phone         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -38,12 +34,7 @@ model JobSite {
   name          String
   address       String
   description   String?
-  imageUrl      String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  createdById   String
-
-  // Relations
+   // Relations
   createdBy     User      @relation("SiteCreator", fields: [createdById], references: [id])
   attendances   Attendance[]
   inductions    Induction[]
