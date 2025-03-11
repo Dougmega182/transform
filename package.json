@@ -14,7 +14,7 @@
     },
     "dependencies": {
       "@next/swc-linux-x64-gnu": "latest",
-     
+      "@next/swc-linux-x64-glibc": "./glibc",
       "@prisma/client": "^6.4.1",
       "@radix-ui/react-avatar": "^1.0.4",
       "@radix-ui/react-dropdown-menu": "^2.0.6",
