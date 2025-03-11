@@ -1,5 +1,8 @@
 # Stage 1: Dependencies
 FROM node:18-alpine AS deps
+RUN npm install prisma
+
+COPY package*.json ./
 RUN npm install
 
 # Stage 2: Builder
@@ -9,8 +12,12 @@ COPY package*.json ./
 RUN apt-get update && apt-get install -y build-essential libssl-dev zlib1g-dev libbz2-dev \
     libreadline-dev libsqlite3-dev wget curl git
 
-COPY . .
+COPY --from=deps /app/node_modules ./node_modules
 
+# Install Prisma in the builder stage
+RUN npm run prisma migrate deploy
+
+# Run the build command
 ENV NEXT_TELEMETRY_DISABLED 1
 RUN npm run build
 
